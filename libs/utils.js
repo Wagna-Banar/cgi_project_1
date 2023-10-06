@@ -162,7 +162,7 @@ export function buildProgramFromSources(gl, vShaderSrc, fShaderSrc, trfFeedbackV
   gl.attachShader(program, fragmentShader);
 
   if(trfFeedbackVaryings != null) {
-    gl.transformFeedbackVaryings(program, trfFeedbackVaryings,gl.INTERLEAVED_ATTRIBS)
+    gl.transformFeedbackVaryings(program, trfFeedbackVaryings, gl.INTERLEAVED_ATTRIBS)
   }
 
   gl.linkProgram(program);
