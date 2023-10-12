@@ -18,59 +18,7 @@ var aspect;
 /** @type {WebGLBuffer} */
 var aBuffer, bBuffer;
 
-const nPoints = 500000;
-
-const ifs = [
-    { transformation: transform1, probability: 0.01 },
-    { transformation: transform2, probability: 0.85 },
-    { transformation: transform3, probability: 0.07 },
-    { transformation: transform4, probability: 0.07 }
-  ];
-
-  function transform1(x, y) {
-    // Implemente a primeira transformação aqui
-    var xx = 0;
-    var yy = 0.16*y;
-    return { x: xx, y: yy };
-  }
-
-  function transform2(x, y) {
-    // Implemente a segunda transformação aqui
-    var xx = 0.85*x + 0.04*y + 0;
-    var yy = -0.04*x + 0.85*y + 1.6;
-    return { x: xx, y: yy };
-  }
-
-  function transform3(x, y) {
-    // Implemente a segunda transformação aqui
-    var xx = 0.2*x + (-0.26*y) + 0;
-    var yy = 0.23*x + 0.22*y + 1.6;
-    return { x: xx, y: yy };
-  }
-
-  function transform4(x, y) {
-    // Implemente a segunda transformação aqui
-    var xx = -0.15*x + 0.28*y + 0;
-    var yy = -0.26*x + 0.24*y + 0.44;
-    return { x: xx, y: yy };
-  }
-
-  function applyRandomTransformation(point) {
-    const random = Math.random();
-    let cumulativeProbability = 0;
-  
-    for (const { transformation, probability } of ifs) {
-        console.log(probability);
-      cumulativeProbability += probability;
-      if (random < cumulativeProbability) {
-        // Aplica a transformação selecionada ao ponto e retorna o novo ponto
-        return transformation(point.x, point.y);
-      }
-    }
-  
-    // Se não houver correspondência, retorne o ponto original
-    return point;
-  }
+const nPoints = 5000000;
 
 /**
  */
@@ -98,23 +46,33 @@ function setup(shaders)
     gl = setupWebGL(canvas, { alpha: true });
 
     drawProgram = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
-    iterationProgram = buildProgramFromSources(gl, shaders["iteration.vert"], shaders["iteration.frag"], ["vNewPosition"]);
+    iterationProgram = buildProgramFromSources(gl, shaders["iteration.vert"], shaders["iteration.frag"], ["vNewPosition", "newFunction"]);
 
     const vertices = [];
 
-    /*for(let i=0; i<nPoints; i++){
-        vertices.push(vec2(Math.random(), Math.random()));
-    }*/
-    const initialPoint = { x: 0, y: 0 };
-
-    let currentPoint = initialPoint;
     for (let i = 0; i < nPoints; i++) {
-        currentPoint = applyRandomTransformation(currentPoint);
-        /**
-         * Use o ponto resultante para desenhar ou fazer qualquer outra coisa
-         */
-        vertices.push(vec2(currentPoint.x, currentPoint.y));
-        //console.log(`Iteração ${i + 1}: x = ${currentPoint.x}, y = ${currentPoint.y}`);
+      vertices.push(vec2(Math.random(), Math.random()));
+    }
+
+    // TODO: adicionar restantes...
+    const ifsTransform = [
+      [0, 0, 0, 0, 0.16, 0, 0, 0, 1],
+      [0.85, 0.04, 0, -0.04, 0.85, 1.6, 0, 0, 1],
+      [0.2, -0.26, 0, 0.23, 0.22, 1.6, 0, 0, 1],
+      [-0.15, 0.28, 0, 0.26, 0.24, 0.44, 0, 0, 1]
+    ];
+  
+    // Converter o array plano em um array de matrizes 3x3
+    const matriz3x3 = [];
+    for (let i = 0; i < ifsTransform.length; i++) {
+      for (let j = 0; j < ifsTransform[i].length; j+=3) {
+        matriz3x3.push(ifsTransform[i].slice(j, j + 3));
+      }
+    }
+
+    for(let i = 0; i < ifsTransform.length; i++) {
+      const matrizes = gl.getUniformLocation(iterationProgram, "matrizes[" + i + "]");
+      gl.uniformMatrix3fv(matrizes, false, flatten(matriz3x3[i])); 
     }
 
     aBuffer = gl.createBuffer();
@@ -157,19 +115,10 @@ function animate()
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
-    /*
-    for (let i = 0; i < 4; i++) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, aBuffer);//
-        const uM = gl.getAttribLocation(iterationProgram, "m[" + i + "]");
-        gl.uniformMatrix3fv(uM, false, flatten(1));
-    }
-    */
-
     gl.drawArrays(gl.POINTS, 0, nPoints);
 
     // Iteration code
 
-    /*
     gl.useProgram(iterationProgram);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, aBuffer);
@@ -192,7 +141,6 @@ function animate()
 
     gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
     gl.deleteTransformFeedback(transformFeedback);
-    */
 
 
     const temp = aBuffer;
