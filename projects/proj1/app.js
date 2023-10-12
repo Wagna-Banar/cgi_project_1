@@ -48,31 +48,10 @@ function setup(shaders)
     drawProgram = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
     iterationProgram = buildProgramFromSources(gl, shaders["iteration.vert"], shaders["iteration.frag"], ["vNewPosition", "newFunction"]);
 
-    const vertices = [];
+    let vertices = [];
 
     for (let i = 0; i < nPoints; i++) {
       vertices.push(vec2(Math.random(), Math.random()));
-    }
-
-    // TODO: adicionar restantes...
-    const ifsTransform = [
-      [0, 0, 0, 0, 0.16, 0, 0, 0, 1],
-      [0.85, 0.04, 0, -0.04, 0.85, 1.6, 0, 0, 1],
-      [0.2, -0.26, 0, 0.23, 0.22, 1.6, 0, 0, 1],
-      [-0.15, 0.28, 0, 0.26, 0.24, 0.44, 0, 0, 1]
-    ];
-  
-    // Converter o array plano em um array de matrizes 3x3
-    const matriz3x3 = [];
-    for (let i = 0; i < ifsTransform.length; i++) {
-      for (let j = 0; j < ifsTransform[i].length; j+=3) {
-        matriz3x3.push(ifsTransform[i].slice(j, j + 3));
-      }
-    }
-
-    for(let i = 0; i < ifsTransform.length; i++) {
-      const matrizes = gl.getUniformLocation(iterationProgram, "matrizes[" + i + "]");
-      gl.uniformMatrix3fv(matrizes, false, flatten(matriz3x3[i])); 
     }
 
     aBuffer = gl.createBuffer();
@@ -119,7 +98,35 @@ function animate()
 
     // Iteration code
 
+    // -------------------------------------------------------------------------------------- //
+
+    // TODO: adicionar restantes...
+    const m = [
+      [0, 0, 0, 0, 0.16, 0, 0, 0, 1],
+      [0.85, 0.04, 0, -0.04, 0.85, 1.6, 0, 0, 1],
+      [0.2, -0.26, 0, 0.23, 0.22, 1.6, 0, 0, 1],
+      [-0.15, 0.28, 0, 0.26, 0.24, 0.44, 0, 0, 1]
+    ];
+    const ifsprobabi = [0.01,0.85,0.07,0.07];
+  
+    let matriz3x3 = [];
+    /*for (let i = 0; i < ifsTransform.length; i++) {
+      for (let j = 0; j < ifsTransform[i].length; j+=3) {
+        matriz3x3.push(ifsTransform[i].slice(j, j + 3));
+      }
+    }*/
+
+    // -------------------------------------------------------------------------------------- //
+
     gl.useProgram(iterationProgram);
+
+    for(let i = 0; i < m.length; i++) {
+      const matrizes = gl.getUniformLocation(iterationProgram, "matrizes[" + i + "]");
+      gl.uniformMatrix3fv(matrizes, false, m[i]); 
+
+      const _prob = gl.getUniformLocation(iterationProgram, "probabi[" + i + "]");
+      gl.uniform1f(_prob, ifsprobabi[i]);
+    }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, aBuffer);
     const vOldPosition = gl.getAttribLocation(iterationProgram, "vOldPosition");
