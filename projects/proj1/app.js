@@ -1,5 +1,5 @@
 import { loadShadersFromURLS, loadShadersFromScripts, setupWebGL, buildProgramFromSources } from "../../libs/utils.js";
-import { vec2, sizeof, flatten } from "../../libs/MV.js";
+import { vec2, vec3, sizeof, flatten } from "../../libs/MV.js";
 
 /** @type {WebGL2RenderingContext} */
 var gl;
@@ -89,16 +89,18 @@ function animate()
     const uTopRight = gl.getUniformLocation(drawProgram, "uTopRight");
     gl.uniform2f(uTopRight, aspect, 1.0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, aBuffer);
     const vPosition = gl.getAttribLocation(drawProgram, "vPosition");
-    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 3*4, 0);
     gl.enableVertexAttribArray(vPosition);
+
+    let vFunction = gl.getAttribLocation(drawProgram, "vFunction");
+    gl.vertexAttribPointer(vFunction, 1, gl.FLOAT, false, 3*4, 8);
+    gl.enableVertexAttribArray(vFunction);
+
 
     gl.drawArrays(gl.POINTS, 0, nPoints);
 
     // Iteration code
-
-    // -------------------------------------------------------------------------------------- //
 
     // TODO: adicionar restantes...
     const m = [
@@ -107,7 +109,7 @@ function animate()
       [0.2, -0.26, 0, 0.23, 0.22, 1.6, 0, 0, 1],
       [-0.15, 0.28, 0, 0.26, 0.24, 0.44, 0, 0, 1]
     ];
-    const ifsprobabi = [0.01,0.85,0.07,0.07];
+    const ifsprobabi = [0.01, 0.85, 0.07, 0.07];
   
     let matriz3x3 = [];
     /*for (let i = 0; i < ifsTransform.length; i++) {
@@ -115,8 +117,6 @@ function animate()
         matriz3x3.push(ifsTransform[i].slice(j, j + 3));
       }
     }*/
-
-    // -------------------------------------------------------------------------------------- //
 
     gl.useProgram(iterationProgram);
 
