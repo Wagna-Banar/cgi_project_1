@@ -12,7 +12,7 @@ void main() {
     float r = fract(sin(dot(vOldPosition.xy, vec2(12.9898, 78.233))) * 43758.545);
 
     float probA = 0.0;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
 
         float prob = probabi[i];
         probA = probA+prob;

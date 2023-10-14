@@ -18,5 +18,5 @@ void main()
     gl_PointSize = 1.3;
     gl_Position = vec4(tmp, 0.0, 1.0);
 
-    color = vec3(vPosition, vFunction);
+    color = vec3(vFunction, 1.0, 1.0);
 }

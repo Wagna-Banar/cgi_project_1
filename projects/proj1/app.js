@@ -51,7 +51,8 @@ function setup(shaders)
     let vertices = [];
 
     for (let i = 0; i < nPoints; i++) {
-      vertices.push(vec2(Math.random(), Math.random()));
+      // vertices.push(vec2(Math.random(), Math.random()));
+      vertices.push(vec3(Math.random(), Math.random(), 1.0));
     }
 
     aBuffer = gl.createBuffer();
@@ -93,14 +94,16 @@ function animate()
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 3*4, 0);
     gl.enableVertexAttribArray(vPosition);
 
-    let vFunction = gl.getAttribLocation(drawProgram, "vFunction");
-    gl.vertexAttribPointer(vFunction, 1, gl.FLOAT, false, 3*4, 8);
+    const vFunction = gl.getAttribLocation(drawProgram, "vFunction");
+    gl.vertexAttribPointer(vFunction, 1, gl.FLOAT, false, 3*4, 2*4);
     gl.enableVertexAttribArray(vFunction);
 
 
     gl.drawArrays(gl.POINTS, 0, nPoints);
 
     // Iteration code
+
+    gl.useProgram(iterationProgram);
 
     // TODO: adicionar restantes...
     const m = [
@@ -110,23 +113,15 @@ function animate()
       [-0.15, 0.28, 0, 0.26, 0.24, 0.44, 0, 0, 1]
     ];
     const ifsprobabi = [0.01, 0.85, 0.07, 0.07];
-  
-    let matriz3x3 = [];
-    /*for (let i = 0; i < ifsTransform.length; i++) {
-      for (let j = 0; j < ifsTransform[i].length; j+=3) {
-        matriz3x3.push(ifsTransform[i].slice(j, j + 3));
-      }
-    }*/
-
-    gl.useProgram(iterationProgram);
 
     for(let i = 0; i < m.length; i++) {
-      const matrizes = gl.getUniformLocation(iterationProgram, "matrizes[" + i + "]");
+      let matrizes = gl.getUniformLocation(iterationProgram, "matrizes[" + i + "]");
       gl.uniformMatrix3fv(matrizes, false, m[i]); 
 
-      const _prob = gl.getUniformLocation(iterationProgram, "probabi[" + i + "]");
+      let _prob = gl.getUniformLocation(iterationProgram, "probabi[" + i + "]");
       gl.uniform1f(_prob, ifsprobabi[i]);
     }
+
 
     gl.bindBuffer(gl.ARRAY_BUFFER, aBuffer);
     const vOldPosition = gl.getAttribLocation(iterationProgram, "vOldPosition");
